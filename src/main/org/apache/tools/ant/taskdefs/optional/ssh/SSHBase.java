@@ -264,6 +264,25 @@ public abstract class SSHBase extends Task implements LogListener {
                 "publickey,keyboard-interactive,password");
         session.setUserInfo(userInfo);
 
+        final String proxyHost = System.getProperty(ProxySetup.HTTP_PROXY_HOST);
+        if (proxyHost != null && proxyHost.length() != 0) {
+            final String proxyPort = System.getProperty(ProxySetup.HTTP_PROXY_PORT);
+            Proxy proxy = null;
+            if (proxyPort != null) {
+                proxy = new ProxyHTTP(proxyHost, Integer.parseInt(proxyPort));
+            } else {
+                proxy = new ProxyHTTP(proxyHost);
+            }
+
+            final String proxyUser = System.getProperty(ProxySetup.HTTP_PROXY_USERNAME);
+            if (proxyUser != null && proxyUser.length() != 0) {
+                final String proxyPassword = System.getProperty(ProxySetup.HTTP_PROXY_PASSWORD);
+                proxy.setUserPasswd(proxyUser, proxyPassword);
+            }
+
+            session.setProxy(proxy);
+        }
+
         if (getServerAliveIntervalSeconds() > 0) {
             session.setServerAliveCountMax(getServerAliveCountMax());
             session.setServerAliveInterval(getServerAliveIntervalSeconds() * 1000);
